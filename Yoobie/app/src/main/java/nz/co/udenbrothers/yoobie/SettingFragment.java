@@ -1,29 +1,51 @@
 package nz.co.udenbrothers.yoobie;
 
+import android.widget.CheckBox;
+import android.widget.RadioGroup;
+import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
+import nz.co.udenbrothers.yoobie.temps.Profile;
+import nz.co.udenbrothers.yoobie.temps.Setting;
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-
-/**
- * A simple {@link Fragment} subclass.
- */
-public class SettingFragment extends Fragment {
-
+public class SettingFragment extends RootFragment {
 
     public SettingFragment() {
-        // Required empty public constructor
+        super(R.layout.fragment_setting);
     }
-
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setting, container, false);
-    }
+    public void created() {
+        RadioGroup animations = findViewById(R.id.radioGroupAnimation);
+        RadioGroup placement = findViewById(R.id.radioGroupTiming);
+        CheckBox wifi = findViewById(R.id.wifiCheck);
 
+        if(Setting.animation() == 0) animations.check(R.id.slideIn);
+        else if(Setting.animation() == 1) animations.check(R.id.fadeIn);
+        else animations.check(R.id.zoomIn);
+
+        animations.setOnCheckedChangeListener((group, checkedId) -> {
+            if(checkedId == R.id.slideIn) Setting.animation(0);
+            else if(checkedId == R.id.fadeIn) Setting.animation(1);
+            else Setting.animation(2);
+        });
+
+        if(Setting.animation() == 0) placement.check(R.id.afterLock);
+        else animations.check(R.id.beforeLock);
+
+        placement.setOnCheckedChangeListener((group, checkedId) -> {
+            if(checkedId == R.id.afterLock) Setting.timing(0);
+            else Setting.timing(1);
+        });
+
+        wifi.setChecked(Setting.wifi());
+
+        clicked(wifi,v->{
+            if(wifi.isChecked()) Setting.wifi(true);
+            else Setting.wifi(false);
+        });
+
+        clicked(R.id.logoutButton, v-> {
+            Profile.logout();
+            parent.toActivity(StartActivity.class);
+        });
+    }
 }

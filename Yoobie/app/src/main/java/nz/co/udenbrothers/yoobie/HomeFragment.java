@@ -1,29 +1,24 @@
 package nz.co.udenbrothers.yoobie;
 
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
+import nz.co.udenbrothers.yoobie.tools.Popup;
+import nz.co.udenbrothers.yoobie.wigets.CountdownView;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class HomeFragment extends Fragment {
-
+public class HomeFragment extends RootFragment {
 
     public HomeFragment() {
-        // Required empty public constructor
+        super(R.layout.fragment_home);
     }
-
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
+    public void created() {
+        CountdownView countdownView = findViewById(R.id.countdown);
+        countdownView.countDownStart("2018-10-09");
 
+        Popup lastImgPop = new Popup(parent, R.layout.last_image_popup);
+        lastImgPop.clicked(R.id.goToWebbutton, v -> lastImgPop.dismiss());
+        lastImgPop.show();
+    }
 }

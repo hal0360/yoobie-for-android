@@ -33,7 +33,7 @@ public class WaveView extends View {
     private RectF mBorderRectF;
     private Path mPath;
 
-    private int mBorderWidth = dp2px(3);
+    private int mBorderWidth = 0;
     private float mBorderRadius = dp2px(2);
     private float mHaftBorderRadius = mBorderRadius / 2;
 

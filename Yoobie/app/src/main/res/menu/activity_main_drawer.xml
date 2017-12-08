@@ -7,11 +7,11 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_how_it_works"
-            android:icon="@drawable/howworksicon"
+            android:icon="@drawable/how_works_icon"
             android:title="@string/how_it_works" />
         <item
             android:id="@+id/nav_about"
-            android:icon="@drawable/abouticon"
+            android:icon="@drawable/about_icon"
             android:title="@string/about" />
         <item
             android:id="@+id/nav_contact"
@@ -19,11 +19,11 @@
             android:title="@string/contact" />
         <item
             android:id="@+id/nav_terms_service"
-            android:icon="@drawable/termsicon"
+            android:icon="@drawable/terms_icon"
             android:title="@string/terms_of_service" />
         <item
             android:id="@+id/nav_privacy"
-            android:icon="@drawable/privacyicon"
+            android:icon="@drawable/privacy_icon"
             android:title="@string/privacy_policy" />
     </group>
 

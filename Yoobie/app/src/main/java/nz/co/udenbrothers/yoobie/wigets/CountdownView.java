@@ -1,10 +1,8 @@
 package nz.co.udenbrothers.yoobie.wigets;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -42,27 +40,12 @@ public class CountdownView extends RelativeLayout {
         tHour = findViewById(R.id.txtTimerHour);
         tMin = findViewById(R.id.txtTimerMinute);
         tSec = findViewById(R.id.txtTimerSecond);
+    }
 
-        // Assign custom attributes
-        if (attrs != null) {
-            TypedArray a = context.getTheme().obtainStyledAttributes(
-                    attrs,
-                    R.styleable.CountdownView,
-                    0, 0);
-
-            String titleText = "";
-
-            try {
-                titleText = a.getString(R.styleable.CountdownView_setAllText);
-            } catch (Exception e) {
-                Log.e("CountdownView", "There was an error loading attributes.");
-            } finally {
-                a.recycle();
-            }
-
-            tDay.setText(titleText);
-            tMin.setText(titleText);
-        }
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        handler.removeCallbacksAndMessages(null);
     }
 
     public void countDownStop(){

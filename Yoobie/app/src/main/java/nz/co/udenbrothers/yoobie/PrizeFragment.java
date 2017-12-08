@@ -1,27 +1,16 @@
 package nz.co.udenbrothers.yoobie;
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import nz.co.udenbrothers.yoobie.wigets.CountdownView;
+import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
 
 
-public class PrizeFragment extends Fragment {
+public class PrizeFragment extends RootFragment {
 
-    public PrizeFragment() {}
+    public PrizeFragment() {
+        super(R.layout.fragment_prize);
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_prize, container, false);
+    public void created() {
 
-
-
-
-        return v;
     }
 }

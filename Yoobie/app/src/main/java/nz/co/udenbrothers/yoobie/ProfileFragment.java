@@ -1,29 +1,33 @@
 package nz.co.udenbrothers.yoobie;
 
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.widget.TextView;
+
+import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
+import nz.co.udenbrothers.yoobie.temps.Profile;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class ProfileFragment extends Fragment {
-
+public class ProfileFragment extends RootFragment {
 
     public ProfileFragment() {
-        // Required empty public constructor
+        super(R.layout.fragment_profile);
     }
-
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
-    }
+    public void created() {
+        TextView name = findViewById(R.id.profileName);
+        TextView mail = findViewById(R.id.profileMail);
+        TextView location = findViewById(R.id.profileLocation);
+        TextView gender = findViewById(R.id.profileGender);
+        TextView phone = findViewById(R.id.profilePhone);
+        TextView birth = findViewById(R.id.profileBirth);
+        name.setText(Profile.name());
+        mail.setText(Profile.mail());
+        location.setText(Profile.location());
+        gender.setText(Profile.gender());
+        phone.setText(Profile.phone());
+        birth.setText(Profile.dateOfBirth());
 
+       // clicked(R.id.editButton, v -> parent.pushActivity());
+    }
 }

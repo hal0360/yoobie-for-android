@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:background="#000"
-    android:layout_height="200dp">
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/inputImg"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:contentDescription="@string/imgDes"
-        app:srcCompat="@android:drawable/ic_menu_search" />
+        android:contentDescription="@string/imgDes" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/input"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
         android:paddingLeft="60dp"
         android:paddingStart="60dp"
         android:paddingRight="10dp"
         android:paddingEnd="10dp"
+        android:background="@null"
         android:inputType="textPersonName"
-        android:textColor="#fff"
-        android:text="Name" />
+        android:textColor="#FFFF00"
+        android:textColorHint="#FFFFFF" />
+    
+    <View
+        android:id="@+id/underline"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#fff"
+        android:layout_alignParentBottom="true" />
 
-
-</RelativeLayout>
+</merge>

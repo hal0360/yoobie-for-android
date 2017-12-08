@@ -1,11 +1,18 @@
 <resources>
-    <declare-styleable name="CountdownView">
-        <attr name="setAllText" format="string" />
+
+    <declare-styleable name="YoobieInput">
+        <attr name="inputIcon" format="integer" />
+        <attr name="placeholder" format="string" />
+        <attr name="inputText" format="string" />
     </declare-styleable>
 
-    <declare-styleable name="IconText">
-        <attr name="txtImg" format="integer" />
-        <attr name="txtTitle" format="string" />
+    <declare-styleable name="YoobieSpinner">
+        <attr name="spinnerIcon" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="YoobieText">
+        <attr name="textIcon" format="integer" />
+        <attr name="text" format="string" />
     </declare-styleable>
 
     <declare-styleable name="WaveView">
