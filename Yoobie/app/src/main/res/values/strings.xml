@@ -3,6 +3,7 @@
     <string name="imgDes">missing link</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="pleae_wait">Please wait...</string>
 
     <string name="action_settings">Settings</string>
     <string name="countdown_holder">00</string>
@@ -43,6 +44,4 @@
     <string name="continue_butt">COONTINUE</string>
     <string name="forgot_pass">Forgot Password?</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

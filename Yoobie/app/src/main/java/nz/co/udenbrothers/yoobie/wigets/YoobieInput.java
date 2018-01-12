@@ -3,6 +3,8 @@ package nz.co.udenbrothers.yoobie.wigets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -54,11 +56,13 @@ public class YoobieInput extends RelativeLayout {
             String placeholder = "";
             Drawable iconImg = null;
             String text = "";
+            int type = 3;
 
             try {
                 placeholder = a.getString(R.styleable.YoobieInput_placeholder);
                 iconImg = a.getDrawable(R.styleable.YoobieInput_inputIcon);
                 text = a.getString(R.styleable.YoobieInput_inputText);
+                type = a.getInt(R.styleable.YoobieInput_inputType, 3);
             } catch (Exception e) {
                 Log.e("YoobieInput", "There was an error loading attributes.");
             } finally {
@@ -67,6 +71,11 @@ public class YoobieInput extends RelativeLayout {
 
             input.setText(text);
             input.setHint(placeholder);
+            if(type == 1)  {
+                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                input.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            }
+            else if (type == 2) input.setInputType(InputType.TYPE_CLASS_NUMBER);
             icon.setBackgroundDrawable(iconImg);
         }
     }

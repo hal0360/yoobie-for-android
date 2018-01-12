@@ -1,273 +1,340 @@
 package nz.co.udenbrothers.yoobie.wigets;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.os.Bundle;
-import android.os.Parcelable;
+import android.graphics.Paint.Style;
+import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
-import nz.co.udenbrothers.yoobie.R;
-
-
 public class WaveView extends View {
+    /**
+     * +------------------------+
+     * |<--wave length->        |______
+     * |   /\          |   /\   |  |
+     * |  /  \         |  /  \  | amplitude
+     * | /    \        | /    \ |  |
+     * |/      \       |/      \|__|____
+     * |        \      /        |  |
+     * |         \    /         |  |
+     * |          \  /          |  |
+     * |           \/           | water level
+     * |                        |  |
+     * |                        |  |
+     * +------------------------+__|____
+     */
+    private static final float DEFAULT_AMPLITUDE_RATIO = 0.03f;
+    private static final float DEFAULT_WATER_LEVEL_RATIO = 0.5f;
+    private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
+    private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
 
-    private static final String STATE_INSTANCE = "state_instance";
-    private static final String STATE_MAX = "state_max";
-    private static final String STATE_PROGRESS = "state_progress";
-    private static final String STATE_WAVE_COLOR = "state_wave_color";
+    public static final int DEFAULT_BEHIND_WAVE_COLOR = Color.parseColor("#00FFFFFF");
+    public static final int DEFAULT_FRONT_WAVE_COLOR = Color.parseColor("#9963B8FF");
+    public static final ShapeType DEFAULT_WAVE_SHAPE = ShapeType.SQUARE;
 
-    private static final int DEFAULT_COLOR = Color.parseColor("#1abc9c");
+    public enum ShapeType {
+        CIRCLE,
+        SQUARE
+    }
 
-    private Paint mPaint;
+    // if true, the shader will display the wave
+    private boolean mShowWave;
+
+    // shader containing repeated waves
+    private BitmapShader mWaveShader;
+    // shader matrix
+    private Matrix mShaderMatrix;
+    // paint to draw wave
+    private Paint mViewPaint;
+    // paint to draw border
     private Paint mBorderPaint;
-    private RectF mBorderRectF;
-    private Path mPath;
 
-    private int mBorderWidth = 0;
-    private float mBorderRadius = dp2px(2);
-    private float mHaftBorderRadius = mBorderRadius / 2;
+    private float mDefaultAmplitude;
+    private float mDefaultWaterLevel;
+    private float mDefaultWaveLength;
+    private double mDefaultAngularFrequency;
 
-    private int mWaveWidth;
-    private int mWaveHeight;
+    private float mAmplitudeRatio = DEFAULT_AMPLITUDE_RATIO;
+    private float mWaveLengthRatio = DEFAULT_WAVE_LENGTH_RATIO;
+    private float mWaterLevelRatio = DEFAULT_WATER_LEVEL_RATIO;
+    private float mWaveShiftRatio = DEFAULT_WAVE_SHIFT_RATIO;
 
-    private int mAmplitude = dp2px(3);
-    private float mAngularVelocity = 3.0f;
+    private int mBehindWaveColor = DEFAULT_BEHIND_WAVE_COLOR;
+    private int mFrontWaveColor = DEFAULT_FRONT_WAVE_COLOR;
+    private ShapeType mShapeType = DEFAULT_WAVE_SHAPE;
 
-    private int mAngle = 0;
-    private float mWaveProgressHeight = 50;
+    private boolean firstRun = true;
 
-    private int mMax = 100;
-    private float mProgress = 0;
-
-    private int mWaveColor = DEFAULT_COLOR;
-
-    private ObjectAnimator mAngleAnim;
+    private AnimatorSet levelAnimatorSet;
 
     public WaveView(Context context) {
-        this(context, null);
+        super(context);
+        init();
     }
 
     public WaveView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        init();
     }
 
-    public WaveView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-
-
-        int attrId = getResources().getIdentifier("colorAccent", "attr", getContext().getPackageName());
-        if (attrId > 0){
-            TypedValue colorAccent = new TypedValue();
-            getContext().getTheme().resolveAttribute(attrId, colorAccent, true);
-            mWaveColor = colorAccent.data;
-        }
-
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.WaveView);
-
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.WaveView_waveBorderWidth, mBorderWidth);
-        mAmplitude = a.getDimensionPixelSize(R.styleable.WaveView_waveAmplitude, mAmplitude);
-        mBorderRadius = a.getDimensionPixelSize(R.styleable.WaveView_waveBorderRadius, (int)mBorderRadius);
-        mHaftBorderRadius = mBorderRadius / 2;
-
-        mWaveColor = a.getColor(R.styleable.WaveView_waveColor, mWaveColor);
-        mMax = a.getInt(R.styleable.WaveView_waveMax, 100);
-        mProgress = a.getInteger(R.styleable.WaveView_waveProgress, 0);
-
-        a.recycle();
-
+    public WaveView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
         init();
     }
 
     private void init() {
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(mWaveColor);
+        mShaderMatrix = new Matrix();
+        mViewPaint = new Paint();
+        mViewPaint.setAntiAlias(true);
 
-        mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBorderPaint.setColor(mWaveColor);
-        mBorderPaint.setStrokeWidth(mBorderWidth);
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-
-        mBorderRectF = new RectF();
-        mPath = new Path();
-
-        setupAngleAnim();
+        initAnimation();
     }
 
-    private void setupAngleAnim() {
-        if (!isViewVisiable()){
-            return;
+    public void initAnimation() {
+
+        levelAnimatorSet = new AnimatorSet();
+
+        ObjectAnimator waveShiftAnim = ObjectAnimator.ofFloat(
+                this, "waveShiftRatio", 0f, 1f);
+        waveShiftAnim.setRepeatCount(ValueAnimator.INFINITE);
+        waveShiftAnim.setDuration(2000);
+        waveShiftAnim.setInterpolator(new LinearInterpolator());
+
+        AnimatorSet mAnimatorSet = new AnimatorSet();
+
+        mAnimatorSet.play(waveShiftAnim);
+       // this.setShowWave(true);
+        mAnimatorSet.start();
+    }
+
+    public void setProgress(float level){
+        levelAnimatorSet.cancel();
+        if(firstRun){
+            mWaterLevelRatio = 0.0f;
+            this.setShowWave(true);
+            firstRun = false;
         }
-        if (mAngleAnim == null) {
-            mAngleAnim = ObjectAnimator.ofInt(this, "angle", 0, 360);
-            mAngleAnim.setDuration(800);
-            mAngleAnim.setRepeatMode(ObjectAnimator.RESTART);
-            mAngleAnim.setRepeatCount(ObjectAnimator.INFINITE);
-            mAngleAnim.setInterpolator(new LinearInterpolator());
-        }
-        if (!mAngleAnim.isRunning()) {
-            mAngleAnim.start();
+        float curLevel = mWaterLevelRatio;
+        ObjectAnimator waterLevelAnim = ObjectAnimator.ofFloat(
+                this, "waterLevelRatio", curLevel, level);
+        waterLevelAnim.setDuration(2000);
+        waterLevelAnim.setInterpolator(new DecelerateInterpolator());
+        levelAnimatorSet.play(waterLevelAnim);
+        levelAnimatorSet.start();
+    }
+
+    public float getWaveShiftRatio() {
+        return mWaveShiftRatio;
+    }
+
+    /**
+     * Shift the wave horizontally according to <code>waveShiftRatio</code>.
+     *
+     * @param waveShiftRatio Should be 0 ~ 1. Default to be 0.
+     *                       Result of waveShiftRatio multiples width of WaveView is the length to shift.
+     */
+    public void setWaveShiftRatio(float waveShiftRatio) {
+        if (mWaveShiftRatio != waveShiftRatio) {
+            mWaveShiftRatio = waveShiftRatio;
+            invalidate();
         }
     }
 
-    private void cancelAngleAnim(){
-        if (mAngleAnim != null){
-            mAngleAnim.cancel();
+    public float getWaterLevelRatio() {
+        return mWaterLevelRatio;
+    }
+
+    /**
+     * Set water level according to <code>waterLevelRatio</code>.
+     *
+     * @param waterLevelRatio Should be 0 ~ 1. Default to be 0.5.
+     *                        Ratio of water level to WaveView height.
+     */
+    public void setWaterLevelRatio(float waterLevelRatio) {
+        if (mWaterLevelRatio != waterLevelRatio) {
+            mWaterLevelRatio = waterLevelRatio;
+            invalidate();
         }
+    }
+
+    public float getAmplitudeRatio() {
+        return mAmplitudeRatio;
+    }
+
+    /**
+     * Set vertical size of wave according to <code>amplitudeRatio</code>
+     *
+     * @param amplitudeRatio Default to be 0.05. Result of amplitudeRatio + waterLevelRatio should be less than 1.
+     *                       Ratio of amplitude to height of WaveView.
+     */
+    public void setAmplitudeRatio(float amplitudeRatio) {
+        if (mAmplitudeRatio != amplitudeRatio) {
+            mAmplitudeRatio = amplitudeRatio;
+            invalidate();
+        }
+    }
+
+    public float getWaveLengthRatio() {
+        return mWaveLengthRatio;
+    }
+
+    /**
+     * Set horizontal size of wave according to <code>waveLengthRatio</code>
+     *
+     * @param waveLengthRatio Default to be 1.
+     *                        Ratio of wave length to width of WaveView.
+     */
+    public void setWaveLengthRatio(float waveLengthRatio) {
+        mWaveLengthRatio = waveLengthRatio;
+    }
+
+    public boolean isShowWave() {
+        return mShowWave;
+    }
+
+    public void setShowWave(boolean showWave) {
+        mShowWave = showWave;
+    }
+
+    public void setBorder(int width, int color) {
+        if (mBorderPaint == null) {
+            mBorderPaint = new Paint();
+            mBorderPaint.setAntiAlias(true);
+            mBorderPaint.setStyle(Style.STROKE);
+        }
+        mBorderPaint.setColor(color);
+        mBorderPaint.setStrokeWidth(width);
+
+        invalidate();
+    }
+
+    public void setWaveColor(int behindWaveColor, int frontWaveColor) {
+        mBehindWaveColor = behindWaveColor;
+        mFrontWaveColor = frontWaveColor;
+
+        if (getWidth() > 0 && getHeight() > 0) {
+            // need to recreate shader when color changed
+            mWaveShader = null;
+            createShader();
+            invalidate();
+        }
+    }
+
+    public void setShapeType(ShapeType shapeType) {
+        mShapeType = shapeType;
+        invalidate();
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
 
-        mWaveWidth = (int) (getWidth() - mHaftBorderRadius);
-        mWaveHeight = (int) (getHeight() - mHaftBorderRadius);
-
-        mBorderRectF.set(mHaftBorderRadius, mHaftBorderRadius, mWaveWidth, mWaveHeight);
+        createShader();
     }
 
-    private void updatePath() {
-        this.mPath.reset();
-        for (int i = 0; i < mWaveWidth; i++) {
-            int y = (int) clamp(
-                    mAmplitude * Math.sin((i* mAngularVelocity + mAngle * Math.PI) / 180.0f) + (mWaveHeight - mWaveProgressHeight),
-                    mHaftBorderRadius,
-                    mWaveHeight
-            );
-            if (i == 0) {
-                this.mPath.moveTo(i, y);
-            }
-            this.mPath.quadTo(i, y, i + 1, y);
+    /**
+     * Create the shader with default waves which repeat horizontally, and clamp vertically
+     */
+    private void createShader() {
+        mDefaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / getWidth();
+        mDefaultAmplitude = getHeight() * DEFAULT_AMPLITUDE_RATIO;
+        mDefaultWaterLevel = getHeight() * DEFAULT_WATER_LEVEL_RATIO;
+        mDefaultWaveLength = getWidth();
+
+        Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        Paint wavePaint = new Paint();
+        wavePaint.setStrokeWidth(2);
+        wavePaint.setAntiAlias(true);
+
+        // Draw default waves into the bitmap
+        // y=Asin(ωx+φ)+h
+        final int endX = getWidth() + 1;
+        final int endY = getHeight() + 1;
+
+        float[] waveY = new float[endX];
+
+        wavePaint.setColor(mBehindWaveColor);
+        for (int beginX = 0; beginX < endX; beginX++) {
+            double wx = beginX * mDefaultAngularFrequency;
+            float beginY = (float) (mDefaultWaterLevel + mDefaultAmplitude * Math.sin(wx));
+            canvas.drawLine(beginX, beginY, beginX, endY, wavePaint);
+
+            waveY[beginX] = beginY;
         }
-        this.mPath.lineTo(mWaveWidth, mWaveHeight);
-        this.mPath.lineTo(0, mWaveHeight);
-        this.mPath.close();
+
+        wavePaint.setColor(mFrontWaveColor);
+        final int wave2Shift = (int) (mDefaultWaveLength / 4);
+        for (int beginX = 0; beginX < endX; beginX++) {
+            canvas.drawLine(beginX, waveY[(beginX + wave2Shift) % endX], beginX, endY, wavePaint);
+        }
+
+        // use the bitamp to create the shader
+        mWaveShader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
+        mViewPaint.setShader(mWaveShader);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        // modify paint shader according to mShowWave state
+        if (mShowWave && mWaveShader != null) {
+            // first call after mShowWave, assign it to our paint
+            if (mViewPaint.getShader() == null) {
+                mViewPaint.setShader(mWaveShader);
+            }
 
-        updatePath();
+            // sacle shader according to mWaveLengthRatio and mAmplitudeRatio
+            // this decides the size(mWaveLengthRatio for width, mAmplitudeRatio for height) of waves
+            mShaderMatrix.setScale(
+                    mWaveLengthRatio / DEFAULT_WAVE_LENGTH_RATIO,
+                    mAmplitudeRatio / DEFAULT_AMPLITUDE_RATIO,
+                    0,
+                    mDefaultWaterLevel);
+            // translate shader according to mWaveShiftRatio and mWaterLevelRatio
+            // this decides the start position(mWaveShiftRatio for x, mWaterLevelRatio for y) of waves
+            mShaderMatrix.postTranslate(
+                    mWaveShiftRatio * getWidth(),
+                    (DEFAULT_WATER_LEVEL_RATIO - mWaterLevelRatio) * getHeight());
 
-        canvas.drawPath(mPath, mPaint);
-        canvas.drawRoundRect(mBorderRectF, mBorderRadius, mBorderRadius, mBorderPaint);
-    }
+            // assign matrix to invalidate the shader
+            mWaveShader.setLocalMatrix(mShaderMatrix);
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        setupAngleAnim();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        cancelAngleAnim();
-    }
-
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-        startOrCancelAngleAnim();
-    }
-
-    @Override
-    public void setAlpha(float alpha) {
-        super.setAlpha(alpha);
-        startOrCancelAngleAnim();
-    }
-
-    private void startOrCancelAngleAnim() {
-        if (isViewVisiable()) {
-            setupAngleAnim();
-        }else {
-            cancelAngleAnim();
+            float borderWidth = mBorderPaint == null ? 0f : mBorderPaint.getStrokeWidth();
+            switch (mShapeType) {
+                case CIRCLE:
+                    if (borderWidth > 0) {
+                        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
+                                (getWidth() - borderWidth) / 2f - 1f, mBorderPaint);
+                    }
+                    float radius = getWidth() / 2f - borderWidth;
+                    canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mViewPaint);
+                    break;
+                case SQUARE:
+                    if (borderWidth > 0) {
+                        canvas.drawRect(
+                                borderWidth / 2f,
+                                borderWidth / 2f,
+                                getWidth() - borderWidth / 2f - 0.5f,
+                                getHeight() - borderWidth / 2f - 0.5f,
+                                mBorderPaint);
+                    }
+                    canvas.drawRect(borderWidth, borderWidth, getWidth() - borderWidth,
+                            getHeight() - borderWidth, mViewPaint);
+                    break;
+            }
+        } else {
+            mViewPaint.setShader(null);
         }
-    }
-
-    private boolean isViewVisiable(){
-        return getVisibility() == VISIBLE && getAlpha()*255>0;
-    }
-
-    public int getMax() {
-        return mMax;
-    }
-
-    public float getProgress() {
-        return mProgress;
-    }
-
-    public void setMax(int max) {
-        mMax = max;
-    }
-
-    public void setProgress(float progress) {
-        mProgress = progress;
-        if (mProgress > mMax){
-            mProgress = mMax;
-        }
-        if (mProgress < 0){
-            mProgress = 0;
-        }
-        float pecent = mProgress * 1.0f / mMax;
-        mWaveProgressHeight = pecent * mWaveHeight;
-        invalidate();
-    }
-
-    public int getWaveColor() {
-        return mWaveColor;
-    }
-
-    public void setWaveColor(int waveColor) {
-        mWaveColor = waveColor;
-        mPaint.setColor(mWaveColor);
-        mBorderPaint.setColor(mWaveColor);
-    }
-
-    public void setAngle(int angle){
-        this.mAngle = angle;
-        invalidate();
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(STATE_INSTANCE, super.onSaveInstanceState());
-        bundle.putInt(STATE_MAX, mMax);
-        bundle.putFloat(STATE_PROGRESS, mProgress);
-        bundle.putInt(STATE_WAVE_COLOR, mWaveColor);
-        return bundle;
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        if (state instanceof Bundle){
-            Bundle bundle = (Bundle) state;
-            mMax = bundle.getInt(STATE_MAX, 100);
-            mProgress = bundle.getInt(STATE_PROGRESS, 0);
-            mWaveColor = bundle.getInt(STATE_WAVE_COLOR, DEFAULT_COLOR);
-            super.onRestoreInstanceState(bundle.getParcelable(STATE_INSTANCE));
-            return ;
-        }
-        super.onRestoreInstanceState(state);
-    }
-
-    private static double clamp(double value, double max, double min) {
-        return Math.max(Math.min(value, min), max);
-    }
-
-    private static int dp2px(int dp){
-        return (int) (Resources.getSystem().getDisplayMetrics().density * dp);
     }
 }

@@ -1,4 +1,4 @@
-package nz.co.udenbrothers.yoobie.sql_stuff;
+package nz.co.udenbrothers.yoobie.tools.sqlUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

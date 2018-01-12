@@ -2,10 +2,6 @@ package nz.co.udenbrothers.yoobie.temps;
 
 import nz.co.udenbrothers.yoobie.App;
 
-/**
- * Created by user on 28/11/2017.
- */
-
 public class Profile {
 
     public static String name(){
@@ -70,6 +66,14 @@ public class Profile {
 
     public static void userID(String n){
         App.putStr("userID", n);
+    }
+
+    public static String lastAdsId(){
+        return App.getStr("lastAdsId", null);
+    }
+
+    public static void lastAdsId(String n){
+        App.putStr("lastAdsId", n);
     }
 
     public static void logout(){

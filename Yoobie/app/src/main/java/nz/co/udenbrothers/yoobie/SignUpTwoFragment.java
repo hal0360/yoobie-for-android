@@ -21,7 +21,9 @@ public class SignUpTwoFragment extends RootFragment {
 
     @Override
     public void created() {
+        StartActivity activity = (StartActivity) parent;
 
+        activity.waveProgress(90);
     }
 
 }

@@ -4,17 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.SharedPreferences;
 
-import nz.co.udenbrothers.yoobie.sql_stuff.SqlAccess;
+import nz.co.udenbrothers.yoobie.tools.sqlUtils.SqlAccess;
 
-/**
- * Created by user on 27/11/2017.
- */
 
 public class App extends Application {
 
     private static SharedPreferences p;
     private static SharedPreferences.Editor editor;
-    public static SqlAccess sqlAccess;
+    private static SqlAccess sqlAccess;
 
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -24,6 +21,10 @@ public class App extends Application {
         editor = p.edit();
         sqlAccess = SqlAccess.getInstance(this);
         sqlAccess.makeDB();
+    }
+
+    public static SqlAccess getSqlDatebase(){
+        return sqlAccess;
     }
 
     public static void putStr(String key, String val){

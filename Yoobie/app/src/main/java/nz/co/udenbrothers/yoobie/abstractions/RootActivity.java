@@ -3,14 +3,23 @@ package nz.co.udenbrothers.yoobie.abstractions;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import nz.co.udenbrothers.yoobie.interfaces.CmdView;
 
 
 public abstract class RootActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle saveInstanceState){
+        super.onCreate(saveInstanceState);
+
+
+    }
 
     protected final void overlayPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -42,4 +51,5 @@ public abstract class RootActivity extends AppCompatActivity {
         startActivity(intent);
         this.finish();
     }
+
 }

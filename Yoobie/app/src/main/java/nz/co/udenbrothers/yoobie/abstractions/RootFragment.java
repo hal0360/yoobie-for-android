@@ -47,4 +47,8 @@ public abstract class RootFragment extends Fragment {
         super.onAttach(activity);
         parent = (RootActivity) activity;
     }
+
+    public void onBackPressed() {
+
+    }
 }

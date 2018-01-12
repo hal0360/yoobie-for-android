@@ -21,10 +21,18 @@ public class Setting {
     }
 
     public static boolean wifi(){
-        return App.getBool("wifi",true);
+        return App.getBool("wifi",false);
     }
 
     public static void wifi(Boolean val){
         App.putBool("wifi", val);
+    }
+
+    public static boolean popup(){
+        return App.getBool("popup",true);
+    }
+
+    public static void popup(Boolean val){
+        App.putBool("popup", val);
     }
 }

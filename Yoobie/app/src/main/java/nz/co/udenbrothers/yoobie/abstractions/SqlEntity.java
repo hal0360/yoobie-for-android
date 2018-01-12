@@ -1,17 +1,18 @@
-package nz.co.udenbrothers.yoobie.models;
+package nz.co.udenbrothers.yoobie.abstractions;
 
 import android.content.ContentValues;
 import android.util.Log;
 
-/*
 import com.google.gson.Gson;
 
 import java.lang.reflect.Field;
 
+import nz.co.udenbrothers.yoobie.App;
+import nz.co.udenbrothers.yoobie.tools.sqlUtils.SqlAccess;
 
-public abstract class Model {
+public abstract class SqlEntity {
 
-    public long id = -1;
+    private long sqlEntityRefId = -1;
 
     public String toJson(){
         Gson gson = new Gson();
@@ -21,9 +22,9 @@ public abstract class Model {
     public void save(){
 
         String table = this.getClass().getSimpleName();
-        SqlAccess sql = App.sqlAccess;
+        SqlAccess sql = App.getSqlDatebase();
         ContentValues cv = new ContentValues();
-        String CREATE_TABLE_NEW = "CREATE TABLE IF NOT EXISTS " + table + " (id integer primary key, ";
+        StringBuilder CREATE_TABLE_NEW = new StringBuilder("CREATE TABLE IF NOT EXISTS " + table + " (sqlEntityRefId integer primary key, ");
 
         Class<?> thisClass;
         try {
@@ -32,44 +33,46 @@ public abstract class Model {
             for(Field f : aClassFields){
                 if(!f.isSynthetic()){
                     if (f.get(this) instanceof Integer) {
-                        CREATE_TABLE_NEW = CREATE_TABLE_NEW + f.getName() + " integer, ";
+                        CREATE_TABLE_NEW.append(f.getName()).append(" integer, ");
                         cv.put(f.getName(), (Integer) f.get(this));
                     } else if (f.get(this) instanceof String) {
-                        CREATE_TABLE_NEW = CREATE_TABLE_NEW + f.getName() + " text, ";
+                        CREATE_TABLE_NEW.append(f.getName()).append(" text, ");
                         cv.put(f.getName(), (String) f.get(this));
                     } else if (f.get(this) == null) {
-                        CREATE_TABLE_NEW = CREATE_TABLE_NEW + f.getName() + " text, ";
-                        cv.put(f.getName(), "");
+                        CREATE_TABLE_NEW.append(f.getName()).append(" text, ");
+                        cv.putNull(f.getName());
                     } else if (f.get(this) instanceof Long) {
-                        CREATE_TABLE_NEW = CREATE_TABLE_NEW + f.getName() + " integer, ";
+                        CREATE_TABLE_NEW.append(f.getName()).append(" integer, ");
                         cv.put(f.getName(), (Long) f.get(this));
                     } else {
-                        CREATE_TABLE_NEW = CREATE_TABLE_NEW + f.getName() + " real, ";
+                        CREATE_TABLE_NEW.append(f.getName()).append(" real, ");
                         cv.put(f.getName(), (Double) f.get(this));
                     }
                 }
             }
+
         } catch (Exception e) {
             Log.e("Class reflection Error",e+"");
             return;
         }
 
-        CREATE_TABLE_NEW = CREATE_TABLE_NEW.substring(0, CREATE_TABLE_NEW.length() - 2);
-        CREATE_TABLE_NEW = CREATE_TABLE_NEW + ")";
-        sql.createTable(CREATE_TABLE_NEW);
+        CREATE_TABLE_NEW = new StringBuilder(CREATE_TABLE_NEW.substring(0, CREATE_TABLE_NEW.length() - 2));
+        CREATE_TABLE_NEW.append(")");
 
-        if(id > 0){
-            sql.update(table, cv, "id", id+"");
+        sql.createTable(CREATE_TABLE_NEW.toString());
+
+        if(sqlEntityRefId > 0){
+            sql.update(table, cv, "sqlEntityRefId", sqlEntityRefId+"");
         }
         else {
-            this.id = sql.add(table, cv);
+            this.sqlEntityRefId = sql.add(table, cv);
         }
         cv.clear();
     }
 
     public void delete(){
-        SqlAccess sql = App.sqlAccess;
+        SqlAccess sql = App.getSqlDatebase();
         String table = this.getClass().getSimpleName();
-        sql.delete(table, "id", id+"");
+        sql.delete(table, "sqlEntityRefId", sqlEntityRefId+"");
     }
-}*/
+}

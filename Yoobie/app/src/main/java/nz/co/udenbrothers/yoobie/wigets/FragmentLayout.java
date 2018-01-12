@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 public class FragmentLayout extends FrameLayout {
 
     private android.support.v4.app.FragmentManager manager;
+    private Fragment topFragment;
 
     public FragmentLayout(Context context)
     {
@@ -28,6 +29,7 @@ public class FragmentLayout extends FrameLayout {
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(getId(), fragment);
         transaction.commit();
+        topFragment = fragment;
     }
 
     public void add(Fragment fragment) {
@@ -35,5 +37,10 @@ public class FragmentLayout extends FrameLayout {
         transactionn.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transactionn.add(getId(), fragment);
         transactionn.commit();
+        topFragment = fragment;
+    }
+
+    public Fragment getTopFragment(){
+        return topFragment;
     }
 }

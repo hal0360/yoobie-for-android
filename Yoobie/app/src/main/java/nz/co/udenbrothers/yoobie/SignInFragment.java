@@ -12,6 +12,7 @@ import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
 
 public class SignInFragment extends RootFragment {
 
+    private StartActivity activity;
 
     public SignInFragment() {
         super(R.layout.fragment_sign_in);
@@ -19,7 +20,14 @@ public class SignInFragment extends RootFragment {
 
     @Override
     public void created() {
+        activity = (StartActivity) parent;
+        activity.setTitle("SIGN IN");
 
+    }
+
+    @Override
+    public void onBackPressed(){
+        activity.toFragment(new StartFragment());
     }
 
 }
