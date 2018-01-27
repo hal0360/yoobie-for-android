@@ -21,9 +21,6 @@ public class StartFragment extends RootFragment {
        // clicked(R.id.signInButton, v-> activity.toFragment(new SignInFragment()));
        // clicked(R.id.signUpButton, v-> activity.toFragment(new SignUpFragment()));
 
-        clicked(R.id.signInButton, v-> activity.waveProgress(0.2f));
-        clicked(R.id.signUpButton, v-> activity.waveProgress(0.9f));
-
         //activity.waveProgress(60);
     }
 

@@ -32,7 +32,6 @@ public class SignUpFragment extends RootFragment {
         conPass = findViewById(R.id.inputComPassword);
         termsCheck = findViewById(R.id.termsCheckbox);
 
-        activity.waveProgress(60);
     }
 
 

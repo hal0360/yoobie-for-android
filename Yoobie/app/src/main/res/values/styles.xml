@@ -1,6 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme. -->
+    <style name="MyActivityAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -9,6 +13,7 @@
         <item name="actionMenuTextColor">#fff</item>
         <item name="colorControlActivated">#000</item>
         <item name="colorControlNormal">#000</item>
+        <item name="android:windowAnimationStyle">@style/MyActivityAnimation</item>
     </style>
 
     <style name="StartTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -18,6 +23,7 @@
         <item name="android:statusBarColor" tools:ignore="NewApi">#F0F9FE</item>
         <item name="colorControlActivated">#fff</item>
         <item name="colorControlNormal">#fff</item>
+        <item name="android:windowAnimationStyle">@style/MyActivityAnimation</item>
     </style>
 
     <style name="BlackMenuTheme" parent="AppTheme">

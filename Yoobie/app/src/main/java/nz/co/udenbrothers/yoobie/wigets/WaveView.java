@@ -113,7 +113,7 @@ public class WaveView extends View {
         AnimatorSet mAnimatorSet = new AnimatorSet();
 
         mAnimatorSet.play(waveShiftAnim);
-       // this.setShowWave(true);
+        this.setShowWave(false);
         mAnimatorSet.start();
     }
 

@@ -1,51 +1,44 @@
 package nz.co.udenbrothers.yoobie;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import nz.co.udenbrothers.yoobie.abstractions.RootActivity;
-import nz.co.udenbrothers.yoobie.abstractions.RootFragment;
-import nz.co.udenbrothers.yoobie.entities.AdImage;
+import nz.co.udenbrothers.yoobie.temps.Profile;
 import nz.co.udenbrothers.yoobie.temps.Screen;
-import nz.co.udenbrothers.yoobie.tools.Kit;
-import nz.co.udenbrothers.yoobie.tools.sqlUtils.Sql;
-import nz.co.udenbrothers.yoobie.wigets.FragmentLayout;
+import nz.co.udenbrothers.yoobie.wigets.CountdownView;
 import nz.co.udenbrothers.yoobie.wigets.WaveView;
+import nz.co.udenbrothers.yoobie.wigets.YoobieText;
 
 public class StartActivity extends RootActivity  {
-
-    private TextView title;
-    private ImageView logo;
-    private FragmentLayout fragmentLayout;
-    private WaveView waveView;
-    private Boolean isWaitng = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        logo = findViewById(R.id.logo);
+        ImageView logo = findViewById(R.id.logo);
         ImageView dummyLogo = findViewById(R.id.dummyLogo);
-        title = findViewById(R.id.startTitle);
-        fragmentLayout = findViewById(R.id.fragment);
-        waveView = findViewById(R.id.wave);
+        TextView title = findViewById(R.id.startTitle);
 
+        WaveView waveView = findViewById(R.id.wave);
+        CountdownView countdownView = findViewById(R.id.countdown);
+        YoobieText signUpButt = findViewById(R.id.signUpButton);
+        YoobieText faceButt = findViewById(R.id.facebookButton);
+        TextView signInButt = findViewById(R.id.signInButton);
 
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
+        countdownView.countDownStart("2018-11-22");
+
+        clicked(signInButt, v -> pushActivity(SignInActivity.class));
+        clicked(signUpButt, v -> pushActivity(SignUp1Activity.class));
+
+        delay(1000, ()->{
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             if (displayMetrics.widthPixels > displayMetrics.heightPixels) {
@@ -62,51 +55,19 @@ public class StartActivity extends RootActivity  {
             logo.setVisibility(View.VISIBLE);
             title.setVisibility(View.VISIBLE);
             dummyLogo.setVisibility(View.GONE);
+        });
 
-            List<AdImage> adImages = Sql.get(AdImage.class);
-            for(AdImage adImage: adImages){
-                Kit.show(this, adImage.toJson());
+        delay(2000, ()->{
+            if(Profile.userID() == null){
+                waveView.setProgress(0.6f);
+                countdownView.setVisibility(View.VISIBLE);
+                signInButt.setVisibility(View.VISIBLE);
+                signUpButt.setVisibility(View.VISIBLE);
+                faceButt.setVisibility(View.VISIBLE);
+            } else{
+
             }
+        });
 
-            waveView.setProgress(0.7f);
-
-        }, 1000);
-        handler.postDelayed(() -> fragmentLayout.add(new StartFragment()), 2000);
-
-    }
-
-    public void waveProgress(float level){
-        waveView.setProgress(level);
-    }
-
-    public void setTitle(String name){
-        title.setText(name);
-    }
-
-    public void toFragment(Fragment fragment){
-        fragmentLayout.replace(fragment);
-    }
-
-    public void waiting(){
-        setTitle("Please wait...");
-        isWaitng = true;
-    }
-
-    public void unWaiting(String name){
-        setTitle(name);
-        isWaitng = false;
-    }
-
-    public void logoVisibility(Boolean visable){
-        if(visable) logo.setVisibility(View.VISIBLE);
-        else logo.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onBackPressed() {
-      //  RootFragment curFrag = (RootFragment) fragmentLayout.getTopFragment();
-     //   curFrag.onBackPressed();
-
-       Kit.show(this,  waveView.getWaterLevelRatio() + "");
     }
 }

@@ -56,6 +56,7 @@ public class YoobieInput extends RelativeLayout {
             String placeholder = "";
             Drawable iconImg = null;
             String text = "";
+            Boolean disabled = false;
             int type = 3;
 
             try {
@@ -76,6 +77,10 @@ public class YoobieInput extends RelativeLayout {
                 input.setTransformationMethod(PasswordTransformationMethod.getInstance());
             }
             else if (type == 2) input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            else if (type == 4){
+                input.setFocusable(false);
+                input.setEnabled(false);
+            }
             icon.setBackgroundDrawable(iconImg);
         }
     }

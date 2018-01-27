@@ -23,7 +23,7 @@ public class SignUpTwoFragment extends RootFragment {
     public void created() {
         StartActivity activity = (StartActivity) parent;
 
-        activity.waveProgress(90);
+
     }
 
 }

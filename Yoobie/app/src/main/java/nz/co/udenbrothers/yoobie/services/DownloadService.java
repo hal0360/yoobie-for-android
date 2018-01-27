@@ -31,7 +31,7 @@ public class DownloadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         Response response = RequestTask.myHttpConnection(null, Url.GET_CAMPAIGN, Profile.token());
-        List<Campaign> campains = Json.parse(response.content, Campaign.class);
+        List<Campaign> campains = Json.fromList(response.content, Campaign.class);
 
         if(campains != null){
 
@@ -44,7 +44,7 @@ public class DownloadService extends IntentService {
             }
             Sql.clear(Campaign.class);
 
-            String fullImgId = "";
+            String fullImgId;
             for(Campaign camp : campains) {
                 try {
                     URL url = new URL(Url.GET_IMAGES(camp.id, camp.imageId));

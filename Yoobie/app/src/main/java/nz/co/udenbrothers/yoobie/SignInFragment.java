@@ -25,9 +25,6 @@ public class SignInFragment extends RootFragment {
 
     }
 
-    @Override
-    public void onBackPressed(){
-        activity.toFragment(new StartFragment());
-    }
+
 
 }

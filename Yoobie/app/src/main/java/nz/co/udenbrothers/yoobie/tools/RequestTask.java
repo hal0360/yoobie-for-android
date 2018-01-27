@@ -1,5 +1,6 @@
 package nz.co.udenbrothers.yoobie.tools;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import java.io.BufferedReader;
@@ -11,18 +12,24 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import dmax.dialog.SpotsDialog;
 import nz.co.udenbrothers.yoobie.interfaces.CmdRes;
 import nz.co.udenbrothers.yoobie.serverObjects.Response;
 
 
 public class RequestTask extends AsyncTask<String,String,Response>
 {
-    private String uploadString;
     private String aus;
+    private SpotsDialog dialog;
+    private String url;
+    private Context context;
+    private String data;
     private CmdRes cmdResSuc, cmdResErr, cmdResFail;
 
-    public RequestTask(String content, String au) {
-        uploadString = content;
+    public RequestTask(Context context, String url, String au) {
+        this.url = url;
+        dialog = new SpotsDialog(context,"Please wait...");
+        this.context = context;
         aus = au;
     }
 
@@ -34,28 +41,37 @@ public class RequestTask extends AsyncTask<String,String,Response>
         cmdResErr = cmd;
     }
 
+    /*
     public void onFail(CmdRes cmd){
         cmdResFail = cmd;
+    }
+    */
+
+    public void send(String data){
+            execute(data);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        dialog.show();
     }
 
     @Override
     protected Response doInBackground(String... params) {
-        return myHttpConnection(uploadString, params[0], aus);
+        return myHttpConnection(params[0], url, aus);
     }
 
     @Override
     protected void onPostExecute(Response response) {
+        dialog.dismiss();
         if(response.statusCode >= 200 && response.statusCode < 300){
             cmdResSuc.exec(response);
         }else if(response.statusCode >= 400 && response.statusCode < 500){
             cmdResErr.exec(response);
         }else {
-            cmdResFail.exec(response);
+           // cmdResFail.exec(response);
+            Kit.show(context,"Problem occurred! Code: " + response.statusCode);
         }
     }
 
@@ -106,7 +122,8 @@ public class RequestTask extends AsyncTask<String,String,Response>
                 }
             }
         } catch (Exception e) {
-            result = "Problem with connection or server. Try again later";
+            result = e.toString();
+
         }
         finally {
             if (urlConnection != null) urlConnection.disconnect();

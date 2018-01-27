@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import java.io.IOException;
 import java.util.List;
 
 import nz.co.udenbrothers.yoobie.R;

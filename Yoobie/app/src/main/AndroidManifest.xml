@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="nz.co.udenbrothers.yoobie">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -62,6 +69,20 @@
 
         <service
             android:name=".services.UploadService"
+            android:exported="false" />
+
+        <activity
+            android:name=".SignInActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/StartTheme" />
+        <activity
+            android:name=".SignUp1Activity"
+            android:screenOrientation="portrait"
+            android:theme="@style/StartTheme" />
+        <activity android:name=".SignUp2Activity" />
+
+        <service
+            android:name=".services.DataService"
             android:exported="false"></service>
     </application>
 
